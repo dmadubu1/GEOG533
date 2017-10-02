@@ -1,0 +1,127 @@
+---
+title: "Lab 3 R Markdown"
+author: "Daniella Madubuike"
+date: "October 2, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Question 1
+
+The **Cars93** dataset in the **MASS** package contains data from 93 cars on sale in the USA in
+1993. Randomly select 40 cars as the training dataset and the remaining 53 cars as the test
+dataset. Save both datasets as csv files. Find out the number of **USA** and **non-USA** cars in the
+training dataset.
+
+```{r, message=FALSE, warning=FALSE}
+library("MASS")
+data(Cars93)
+```
+
+#####Create train and test datasets
+```{r}
+train <- sample(1:nrow(Cars93), 40)
+test <- Cars93[-train, ]
+train2 <- Cars93[train, ]
+```
+
+#####Save both files as a csv
+```{r}
+write.csv(test, file = "test.csv")
+write.csv(train2, file = "train.csv")
+```
+
+#####Use filter in dplyr to make selection
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+x <- filter(train2, Origin == 'USA')
+y <- filter(train2, Origin == 'non-USA')
+```
+
+
+
+#Question 2
+Assume that the probabilities of boy and girl births are 0.515 and 0.485, respectively. Use the
+**sample()** function to simulate 10 births and print out the result. How many boys and girls
+do you get out of 10 births? Then simulate 10,000 births. How many boys and girls do you
+get out of 10,000 births?
+
+#####Set random number generator
+```{r}
+set.seed(100)
+```
+
+#####10 Boy/Girl Births
+```{r}
+births1 <- sample(c("Boy","Girl"), 10, replace = TRUE, prob= c(0.515, 0.485))
+births1
+```
+
+#####10000 Boy/Girl Births
+```{r}
+births2 <- sample(c("Boy","Girl"), 10000, replace = TRUE, prob= c(0.515, 0.485))
+#how to print
+```
+
+
+#Question 3
+Assume that the probabilities of boy and girl births are 0.515 and 0.485, respectively. What’s
+the probability of having exactly 3 boys out of 10 births? What’s the probability of having 8
+or more boys out of 10 births? Plot both the density function and cumulative probability
+function of the number of boy births out of 10.
+
+#####Exactly 3 Boy Births
+```{r}
+dbinom(3, size =10, prob = c(0.515, 0.485))
+```
+
+#####8 or More Boy Births
+```{r}
+pbinom(8, size = 10, prob = c(0.515, 0.485), lower.tail = FALSE)
+```
+
+#####Density Function Plot
+```{r}
+n <- 10
+x <- 0:n
+y <- dbinom(x, size = n, prob = c(0.515, 0.485))
+plot(x, y, main= "Density Function Plot", type = "b", pch = 16, col= "red")
+```
+
+#####Cumulative Function Plot
+```{r}
+n <- 10
+x <- 0:n
+y <- pbinom(x, size = n, prob = c(0.515, 0.485))
+plot(x, y, main= "Cumulative Probabality Function Plot", type = "b", pch = 16, col= "red")
+```
+
+
+#Question 4
+If cars arrive randomly at a traffic light at the rate of five every ten seconds. What the
+probability that exactly four cars arrive in the next ten seconds? What’s the probability that
+more than five cars arrive in the next ten seconds? Plot the density function of 0-20 cars
+arriving in the next ten seconds.
+
+#####Exactly 4 Cars
+```{r}
+dpois(4, lambda = 5, log = FALSE)
+```
+
+#####More than 5 Cars
+```{r}
+ppois(6, lambda = 5, lower.tail = FALSE)
+```
+
+#####Density Function Plot
+```{r}
+n <- 20
+x <- 0:n
+y <- dpois(x, lambda = 5)
+plot(x,y, type = "b",pch = 16,col="blue")
+```
+
+
