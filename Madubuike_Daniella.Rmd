@@ -1,0 +1,124 @@
+---
+title: "Lab 4"
+author: "Daniella Madubuike"
+date: "October 9, 2017"
+output: 
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Question 1a
+The number of points scored by each team in a tournament is normally distributed, with
+mean μ = 32 and standard deviation σ = 7. What is the probability of: A team scoring 20 points or fewer? Plot the density function and shade the area. 
+```{r}
+curve(dnorm(x, mean = 32, 7), from = 0, to = 53, main = '20 Points or Fewer')
+cord.x <- c(0, seq(0,20,0.01), 20)
+cord.y <- c(0, dnorm(seq(0,20,0.01), mean = 32, sd = 7), 0)
+polygon(cord.x, cord.y, col = "red")
+```
+
+###Question 1b
+A team scoring more than 35 points? Plot the density function and shade the area.
+```{r}
+curve(dnorm(x, mean = 32, 7), from = 11, to = 53, main = 'More than 35 Points')
+cord.x <- c(35, seq(35,53, 0.01), 53)
+cord.y <- c(0, dnorm(seq(35,53,0.01), mean = 32, sd = 7), 0)
+polygon(cord.x, cord.y, col = "red")
+```
+
+###Question 1c
+A team scoring between 20 and 40 points? Plot the density function and shade the area. 
+```{r}
+curve(dnorm(x, mean = 32, 7), from = 11, to = 53, main = 'Between 20 and 40 points')
+cord.x <- c(20, seq(20,40, 0.01), 40)
+cord.y <- c(0, dnorm(seq(20,40,0.01), mean = 32, sd = 7), 0)
+polygon(cord.x, cord.y, col = "red")
+```
+
+###Question 2a
+The number of comments per post on a social media site is exponentially distributed, with the
+average post receiving ten comments. What percentage of posts get: Fewer than three comments? Plot the density function and shade the area.
+
+```{r}
+x <- dexp(3, rate = 0.1)
+curve(dexp(x, 0.1), from = 0, to = 90, main = 'Fewer than 3 Comments')
+
+cord.x <- c(0, seq(0,3,0.01), 3)
+cord.y <- c(0, dexp(seq(0,3,0.01), 0.1), 0)
+polygon(cord.x, cord.y, col = "red")
+```
+
+###Question 2b
+More than 20 comments? Plot the density function and shade the area
+```{r}
+x <- pexp(20, rate = 0.1, lower.tail = FALSE) 
+curve(dexp(x, 0.1), from = 0, to = 90, main = 'More than 20 Comments')
+
+cord.x <- c(20, seq(20,90,0.01), 90)
+cord.y <- c(0, dexp(seq(20,90,0.01), 0.1), 0)
+polygon(cord.x, cord.y, col = "red")
+```
+
+###Question 2c
+Between five and ten comments? Plot the density function and shade the area. 
+```{r}
+curve(dexp(x,0.1), from = 0, to = 90, main = 'Between 5 and 10 Comments')
+
+cord.x <- c(5, seq(5,10, 0.01), 10)
+cord.y <- c(0, dexp(seq(5,10,0.01), 0.1), 0)
+polygon(cord.x, cord.y, col = "red")
+```
+
+###Question 3a
+Basic raster creation and calculation: Create a first raster (30 rows × 30 columns) and assign values to the raster based on
+random values from a uniform distribution. Plot the raster and the histogram.
+```{r, message=FALSE, warning=FALSE}
+if(!require(raster)) install.packages("raster")
+library(raster)
+ras <- raster(nrows=30,ncols=30,xmn=0,xmx=10,ymn=0,ymx=10)
+set.seed = 100
+ras[] <- runif(ncell(ras))
+plot(ras)
+hist(ras)
+```
+
+###Question 3b
+Create a second raster (30 rows × 30 columns) and assign values to the raster based
+on random values from a normal distribution. Plot the raster and the histogram.
+```{r}
+ras2 <- raster(nrows=30,ncols=30,xmn=0,xmx=10,ymn=0,ymx=10)
+set.seed = 200
+ras2[] <- rnorm(ncell(ras2))
+plot(ras2)
+hist(ras2)
+```
+
+###Question 3c
+Create a third raster (30 rows × 30 columns) and assign values to the raster based on
+cell-by-cell addition of the first raster and the second raster. Plot the raster and the
+histogram.
+
+```{r}
+newraster <- ras + ras2
+plot(newraster)
+hist(newraster)
+```
+
+###Question 3d
+Calculate the mean value of the third raster. Reclassify the third raster into a binary
+image: 1 (cell value > mean value) and 0 (cell value <= mean value). Save the
+reclassified image to your working directory as a TIFF image.
+```{r}
+a <- cellStats(newraster,"mean")
+newraster[newraster > a ] <- 1
+newraster[newraster <= a] <- 0
+plot(newraster)
+writeRaster(newraster,filename = "newraster.tif", overwrite = TRUE)
+read <- raster("newraster.tif")
+```
