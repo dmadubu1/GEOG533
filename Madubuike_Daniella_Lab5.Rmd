@@ -1,6 +1,6 @@
 ---
 title: "Geog533 Lab 5"
-author: "Your name"
+author: "Daniella Madubuike"
 output:  
   html_notebook:
     toc: TRUE
