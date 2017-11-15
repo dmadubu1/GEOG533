@@ -1,0 +1,221 @@
+---
+title: "Geog533 Lab 8"
+author: "Daniella Madubuike"
+output: 
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+---
+
+Complete the following exercises in Chapter 8 (Introduction to Regression Analysis) of the textbook [R] pages 247-250. 
+
+## Question 1
+
+This is Exercise 1 in Chapter 8 of the Textbook [R].
+
+A regression of weekly shopping trip frequency on annual income (data entered in thousands of dollars) is performed on data collected from 24 respondents. The results are summarized below:
+
+* Intercept: 0.46
+* Slope: 0.19
+
+|          | Sum of squares  | Degrees of freedom |  Mean square   |       *F*       |
+|----------|-----------------|--------------------|----------------|-----------------|
+|Regression|                 |                    |                |                 |
+| Residual |       1.7       |                    |                |                 |
+| Total    |       2.3       |                    |                |                 |
+
+
+### Question 1(a)
+Fill in the blanks in the ANOVA table.
+
+```{r}
+
+```
+
+
+|          | Sum of squares  | Degrees of freedom |  Mean square   |       *F*       |
+|----------|-----------------|--------------------|----------------|-----------------|
+|Regression|     0.6         |        1            |    0.6        |        7.79     |
+| Residual |       1.7       |       22            |   0.077       |                 |
+| Total    |       2.3       |        21           |                |                 |
+
+
+### Question 1(b)
+What is the predicted number of weekly shopping trips for someone making $50,000/year?
+```{r}
+#y = mx + b
+y = 0.19*50000 + 0.46
+
+#to convert data
+ans <- y/1000
+ans
+```
+
+
+### Question 1(c)
+In words, what is the meaning of the coefficient 0.19?
+
+####The coefficient 0.19 is the slope, which is the measure of the steepness of the line. It indicates a change in y after a unit change in x.
+
+
+### Question 1(d)
+Is the regression coefficient significantly different from zero? How do you know?
+```{r}
+qf(0.95, 1, 22)
+```
+####The regression coefficient is Not significantly diff from zero because the f stat (4.3) is less than the f crit (7.79) so we accept the null of equal to zero.
+
+
+### Question 1(e)
+What is the value of the correlation coefficient?
+```{r}
+#r <- ssm / sst
+r <- (2.3 - 1.7)/ 2.3
+r
+```
+
+
+
+
+
+## Question 2
+
+This is Exercise 6 in Chapter 8 of the Textbook [R].
+
+The following data are collected in an effort to determine whether snowfall is dependent upon elevation: 
+
+| Snowfall (inches) | Elevation (feet) |
+|-------------------|------------------|
+|       36          |       400        |
+|       78          |       800        |
+|       11          |       200        |
+|       45          |       675        |
+
+Using R, show your work on exercises (a) through (g).
+
+### Question 2(a)
+Find the regression coefficients (the intercept and the slope coefficient).
+```{r}
+s <- c(36, 78, 11, 45)
+e <- c(400, 800, 200, 675)
+
+ m <- lm(s ~ e)
+ summary(m)
+ anova(m)
+```
+####Intercept coefficient is -7.63721, slope coefficient is 0.0966
+
+### Question 2(b)
+Estimate the standard error of the residuals about the regression line.
+```{r}
+```
+####11.25 on 2 degrees of freedom
+
+### Question 2(c)
+Test the hypothesis that the regression coefficient associated with the independent variables is equal to zero. Also place a 95% confidence interval on the regression coefficient.
+```{r}
+qf(0.95, 1, 2)
+```
+####Since F -statistical(16.17) is less than F critical (18.51), we accept the null.
+
+### Question 2(d)
+Find the value of $r^2$.
+```{r}
+```
+####R squared = 0.8899
+
+### Question 2(e)
+Make a table of the observed values, predicted values, and the residuals.
+```{r}
+qo <- data.frame(anova(m))
+qo
+```
+
+
+### Question 2(f)
+Prepare an analysis of variance table portraying the regression results.
+```{r}
+aov(m)
+anova(m)
+```
+
+
+|          | Sum of squares  | Degrees of freedom |  Mean square   |       *F*       |
+|----------|-----------------|--------------------|----------------|-----------------|
+|Regression|      2047.77    |        1           |     2047.77    |      16.17      |
+| Residual |       253.22    |        2           |     126.61     |                 |
+| Total    |      2300.99    |        3           |                |                 |
+
+### Question 2(g)
+Graph the data and the regression line.
+```{r}
+plot(e, s)
+abline (m, col="red")
+```
+
+
+
+
+## Question 3
+
+This is Exercise 10 in Chapter 8 of the Textbook [R].
+
+Use R and the [Milwaukee dataset](http://spatial.binghamton.edu/geog533/data/Milwaukee_Sales.csv) to:
+
+### Problem
+perform a regression using sales price as the dependent variable and lot size as the independent variable.
+
+### Solution
+```{r}
+url = "http://spatial.binghamton.edu/geog533/data/Milwaukee_Sales.csv"
+url <- "Milwaukee_Sales.csv"
+df <- read.csv(url,header = TRUE)
+m <- lm(df$SalePrice ~ df$LotSize)
+summary(m)
+```
+
+
+
+## Question 4
+
+This is Exercise 11 in Chapter 8 of the Textbook [R].
+
+Use R and the Hypothetical [UK Housing Prices dataset](http://spatial.binghamton.edu/geog533/data/UK_Housing.csv) to:
+
+### Question 4(a) 
+perform a regression using house price as the dependent variable, and number of bedrooms as the independent variable;
+
+```{r}
+url = "http://spatial.binghamton.edu/geog533/data/UK_Housing.csv"
+url <- "UK_Housing.csv"
+df <- read.csv(url,header = TRUE)
+m <- lm(df$price ~ df$bedrooms)
+summary(m)
+```
+
+
+### Question 4(b) 
+(b) repeat part (a), using the number of bathrooms as the independent variable, and comment on the results.
+```{r}
+url = "http://spatial.binghamton.edu/geog533/data/UK_Housing.csv"
+url <- "UK_Housing.csv"
+df <- read.csv(url,header = TRUE)
+m <- lm(df$price ~ df$bathrooms)
+summary(m)
+```
+
+
+## Question 5
+Download the [hometown.csv](http://spatial.binghamton.edu/geog533/data/hometown.csv), append your name and hometown coordinates to the csv, then use [leaflet](https://rstudio.github.io/leaflet/) to create a web map (10 pt.)
+
+```{r}
+if(!require(leaflet)) install.packages("leaflet")
+url2 = "http://spatial.binghamton.edu/geog533/data/hometown.csv"
+url2 <- "hometown.csv"
+df <- read.csv(url2, header = TRUE)
+m <- leaflet()
+m <- addTiles(m) # Add default OpenStreetMap map tiles
+m <- addMarkers(m, lng=df$latitude, lat=df$longitude, popup=df$fullname)
+m
+```
+
