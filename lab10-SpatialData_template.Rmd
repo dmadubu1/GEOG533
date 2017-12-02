@@ -1,0 +1,202 @@
+---
+title: "Geog533 Lab 10"
+author: "Daniella Madubuike"
+output: 
+  html_notebook:
+    toc: TRUE
+    toc_float: TRUE
+---
+
+## Question 1
+Use R package UScensus2010county to complete the following tasks:  (20 pt.)
+
+### Question 1(a)
+Plot a map of New York counties using the plot function.
+```{r}
+### install packages
+if(!require(UScensus2010)) install.packages("UScensus2010")
+library(UScensus2010)
+if(!require(UScensus2010county)) install.county("osx")
+if(!require(UScensus2010tract)) install.tract("osx")
+library(UScensus2010county)
+library(UScensus2010tract)
+data(new_york.county10)
+shp <- new_york.county10
+plot(shp)
+```
+
+### Question 1(b)	
+Plot a map of New York counties using the qtm function.
+```{r}
+if(!require(tmap)) install.packages("tmap")
+library(tmap)
+qtm(shp)
+qtm(shp,fill = "NAME10")
+qtm(shp,fill = "P0010001")
+```
+
+
+### Question 1(c)	
+How many counties in New York State?
+```{r}
+count <- shp$county
+length(table(count))
+```
+
+### Question 1(d)	
+What’s the 3-digit fips code of Broome County?
+```{r}
+#if (shp$NAMELSAD10 == "Broome County") {
+  #print(shp$county)}
+
+boom <- shp$county == "Broome County"
+```
+
+### Question 1(e)	
+Compute descriptive statistics of the population column (P0010001), including total, minimum, maximum, mean, median, and skewness. 
+```{r}
+if(!require(fBasics)) install.packages("fBasics")
+library(fBasics)
+pop <- shp$P0010001
+
+basicStats(pop)
+summary(pop)
+
+```
+
+### Question 1(f)	
+Create a histogram and a boxplot of the population.
+```{r}
+hist(pop)
+```
+
+
+## Question 2
+Use R package UScensus2010tract to complete the following tasks:    (20 pt.)
+
+### Question 2(a)	
+Plot a map of New York census tracts using the plot function.
+```{r}
+if(!require(UScensus2010)) install.packages("UScensus2010")
+library(UScensus2010)
+if(!require(UScensus2010county)) install.county("osx")
+if(!require(UScensus2010tract)) install.tract("osx")
+library(UScensus2010county)
+library(UScensus2010tract)
+data(new_york.tract10)
+shp <- new_york.tract10
+df <- shp@data
+plot(shp)
+```
+
+### Question 2(b)
+Compute the total population based on census tracts.
+```{r}
+df <- shp@data
+sum(pop)
+```
+
+### Question 2(c)
+Select all census tracts in Broome County and plot the map. 
+```{r}
+library(rgdal)
+df <- shp@data
+sel <- data.frame(df$county == "007")
+shp[sel, ]
+plot(shp[sel,])
+```
+
+### Question 2(d)
+What’s the total population of Broome County?
+```{r}
+sum(sel)
+```
+
+### Question 2(e)
+Create a histogram and a boxplot of population based on census tracts of Broome County.
+```{r}
+df <- shp@data
+sel <- df$county == "007"
+shp[sel, ]
+hist(sel)
+```
+
+### Question 2(f)
+Select the first five columns of the shapefile of Broome County census tract; add a new population ratio column (= census tract population / county population); save the new shapefile to the hard drive. 
+```{r}
+
+```
+
+
+## Question 3
+
+Use R packages raster and ncdf4 to complete the following tasks:     (20 pt.)
+
+### Question 3(a)		
+Load the multi-band raster dataset “NDVI.nc” into R.
+```{r}
+#setwd("Downloads/")
+#getwd()
+#if(!require(ncdf4)) install.packages("ncdf4")
+#library(ncdf4)
+#library(raster)
+#ndvi.rb <- brick("GIMMS.NDVI.360.720.2000.2002.30days.nc")
+#ndvi.rb
+
+if(!require(ncdf4)) install.packages("ncdf4")
+library(ncdf4)
+library(rgdal)
+library(raster)
+multi <- raster("/Users/daniellamadubuike/Downloads/NDVI.nc/")
+multi
+```
+
+### Question 3(b)		
+Get the basic information about the dataset, including the number of rows, columns, cells, and bands; spatial resolution, extent, bounding box, and projection.
+```{r}
+nrow(multi)
+ncol(multi)
+ncell(multi)
+extent(multi)
+bbox(multi)
+res(multi)
+projection(multi)
+```
+
+### Question 3(c)	
+Aggregate all bands to generate a mean NDVI raster and a maximum NDVI raster; save the two new raster datasets to the hard drive. 
+```{r}
+meanmulti <- as.data.frame(cellStats(multi2,mean))
+meanmulti
+maxmulti <- as.data.frame(cellStats(multi2,max))
+maxmulti
+writeRaster(meanmulti, filename = "meanmulti.grd")
+writeRaster(maxmulti, filename = "maxmulti")
+```
+
+### Question 3(d)			
+Plot the maps of monthly NDVI of the year 2001
+```{r}
+multi2 <- brick("/Users/daniellamadubuike/Downloads/NDVI.nc/")
+multi2
+plot(multi2, 13:24)
+
+
+```
+
+### Question 3(e)	
+Create histograms of monthly NDVI of the year 2001.
+```{r, warning=FALSE}
+hist(multi2, 13:24)
+```
+
+### Question 3(f)			
+Plot the NDVI map of July 2000; click any location with data on the map and retrieve the NDVI time series for all years; plot the NDVI time series of the selected location. 
+
+```{r}
+plot(multi2, 7)
+values <- click(multi2, n=1, xy=TRUE)
+#values <- click(multi2, n=1, xy=FALSE)
+plot(as.vector(values), type="b")
+```
+
