@@ -1,0 +1,180 @@
+---
+title: "Final Project - GEOG 533"
+author: "Daniella Madubuike"
+date: "December 3, 2017"
+output: html_document
+---
+
+###Changing Car Culture Through Carpooling
+#####Description
+Research focused on measuring the carpooling potential of students by estimating the overall interest and willingness of students to utilize this potential alternative transportation option.
+
+#####Need for Analysis
+To compare variables obtained from survey and find correlations and positive/negative relationships.
+
+#####Problem
+Binghamton Univeristy has a large parking problem. It also lacks student location data.
+
+#####Results/Benefits
+The tool can be incorporated into potential future carpooling systems.  Could help to reduce the inherent car culture of single-occupancy driving. 
+
+#####Test Data 
+Survey questions based on satisfaction, drive time, comfort level with carpooling, perceived benefits, and perceived drawbacks of carpooling, were asked, in both open-ended and close-ended question format.
+
+
+
+##Location Analysis
+####Distance Based Analysis: Average Nearest Neighbor 
+
+```{r}
+#####Change working directory to where data below is located.
+setwd("/Users/daniellamadubuike/Documents")
+library(ggmap)
+library(Rcpp)
+
+if(!require(readxl)) install.packages("readxl")
+library(readxl)
+lats <- read_excel("excellatlonwo.xlsx")
+
+data(lats)
+plot(lats$Longitude,lats$Latitude,xlab="Longtitude",ylab="Latitude")
+```
+
+
+Using the 'spatstat' package.
+```{r, message=FALSE}
+if(!require(spatstat)) install.packages("spatstat")
+library(spatstat)
+P <- lats
+```
+
+To compute the average *first* nearest neighbor distance (1st order):
+```{r}
+mean(nndist(P, k=1))
+```
+
+To compute the average *second* nearest neighbor distance (2nd order):
+```{r}
+mean(nndist(P, k=2))
+```
+
+To plot average distance as a function of neighbor order for the first 100 closest neighbors:
+```{r}
+ANN <- apply(nndist(P, k=1:100),2,FUN=mean)
+plot(ANN ~ eval(1:100), type="b", main=NULL )
+```
+
+The bottom axis shows the neighbor order number and the left axis shows the average distance.
+
+
+
+##Statistical Analysis
+####Categorical Data: Chi – Square Test
+
+Public Transportation Frequency *VS* Satisfaction With Parking
+
+Null: There is no correlation between student public transportation use frequency and their satisfaction with parking
+Alternative: There is a correlation between student public transportation use frequency and their satisfaction with parking
+
+```{r,message=FALSE}
+if(!require(readxl)) install.packages("readxl")
+library(readxl)
+excel <- read_excel("excel.xlsx")
+tbl = table(excel$`Public transportation Use Frequency`, excel$`Satisfaction W Parking`)
+tbl
+chisq.test(tbl, simulate.p.value = TRUE)
+```
+
+P-value is 0.04, we reject the null.
+
+#####Continuous Data: Anova Test
+Income *VS* Parking Time
+
+Null: There is no correlation between student income and the amount of time is takes them to park.
+Alternative: There is a correlation between student income and the amount of time is takes them to park.
+```{r}
+if(!require(readxl)) install.packages("readxl")
+library(readxl)
+excel <- read_excel("excel.xlsx")
+
+x <- excel$Income
+y <- excel$`Parking Time`
+plot(y ~ x)
+m <- lm(y~x)
+summary(m)
+abline(m,col="red",lwd=2)
+```
+
+P-value is 0.539, so we fail to reject the null.
+
+##Qualitative Data
+####World Cloud
+Data Mining
+```{r, message=FALSE}
+if(!require(tm)) install.packages("tm")  # for text mining
+if(!require(SnowballC))install.packages("SnowballC") # for text stemming
+if(!require(wordcloud))install.packages("wordcloud") # word-cloud generator 
+if(!require(RColorBrewer))install.packages("RColorBrewer") # color palettes
+
+library("tm")
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+```
+
+Place data in text file and read into R, then create Corpus
+```{r}
+filepath <- "https://dmadubu1.github.io/comment.txt"
+text <- readLines(filepath)
+docs <- Corpus(VectorSource(text))
+#inspect(docs)
+```
+
+Remove unwanted punctuation marks
+```{r}
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "/")
+docs <- tm_map(docs, toSpace, "@")
+docs <- tm_map(docs, toSpace, "\\|")
+```
+
+Remove other unwanted words and others
+```{r}
+# Convert the text to lower case
+docs <- tm_map(docs, content_transformer(tolower))
+# Remove numbers
+docs <- tm_map(docs, removeNumbers)
+# Remove english common stopwords
+docs <- tm_map(docs, removeWords, stopwords("english"))
+# Remove your own stop word
+# specify your stopwords as a character vector
+docs <- tm_map(docs, removeWords, c("blabla1", "blabla2")) 
+# Remove punctuations
+docs <- tm_map(docs, removePunctuation)
+# Eliminate extra white spaces
+docs <- tm_map(docs, stripWhitespace)
+# Text stemming
+# docs <- tm_map(docs, stemDocument)
+```
+
+Sort text file
+```{r}
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+head(d, 10)
+```
+ 
+Set seed and creat world cloud
+```{r}
+set.seed(1234)
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=150, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(6, "Dark2"))
+```
+
+World cloud show trend words like parking, campus, spots, students, people, carpooling, incentive. As expected.
+
+
+
